@@ -10,7 +10,13 @@ import {
     CheckCircle2,
     ArrowUpRight,
     ArrowDownRight,
-    TrendingDown
+    TrendingDown,
+    DollarSign,
+    Briefcase,
+    Activity,
+    Clock,
+    Zap,
+    HelpCircle
 } from "lucide-react";
 import {
     BarChart,
@@ -24,30 +30,32 @@ import {
     Area,
     PieChart,
     Pie,
-    Cell
+    Cell,
+    LineChart,
+    Line,
 } from "recharts";
 import { useI18n } from "@/lib/i18n";
 
-const INVENTORY_DATA = [
-    { name: "Mon", stock: 400 },
-    { name: "Tue", stock: 300 },
-    { name: "Wed", stock: 500 },
-    { name: "Thu", stock: 280 },
-    { name: "Fri", stock: 590 },
-    { name: "Sat", stock: 320 },
-    { name: "Sun", stock: 480 },
+// Mock data for charts
+const CASH_FLOW_DATA = [
+    { month: "Jan", inflow: 45000, outflow: 32000 },
+    { month: "Feb", inflow: 52000, outflow: 38000 },
+    { month: "Mar", inflow: 48000, outflow: 35000 },
+    { month: "Apr", inflow: 61000, outflow: 42000 },
+    { month: "May", inflow: 55000, outflow: 39000 },
+    { month: "Jun", inflow: 67000, outflow: 45000 },
 ];
 
-const PROJECT_STATUS = [
-    { name: "Completed", value: 45, color: "#10b981" },
-    { name: "Ongoing", value: 30, color: "#3b82f6" },
-    { name: "Delayed", value: 15, color: "#f59e0b" },
-    { name: "Cancelled", value: 10, color: "#ef4444" },
+const OVERDUE_INVOICES = [
+    { id: "INV-2024-001", client: "Solar Tech Co.", amount: 12500, days: 5 },
+    { id: "INV-2024-012", client: "Green Energy Ltd", amount: 8400, days: 12 },
+    { id: "INV-2024-015", client: "Home Power Inc", amount: 3200, days: 3 },
 ];
 
 export default function Dashboard() {
     const [mounted, setMounted] = useState(false);
     const [stats, setStats] = useState<any>(null);
+    const { t } = useI18n();
 
     useEffect(() => {
         setMounted(true);
@@ -57,92 +65,272 @@ export default function Dashboard() {
             .catch(err => console.error(err));
     }, []);
 
-    const { t } = useI18n();
-
     if (!mounted) return null;
 
+    const formatCurrency = (val: number) => {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val || 0);
+    };
+
+    const DEPT_SPENDING = [
+        { name: t("logistics"), value: 40, color: "#6366f1" },
+        { name: t("inventory"), value: 30, color: "#f59e0b" },
+        { name: t("users"), value: 20, color: "#10b981" },
+        { name: "Marketing", value: 10, color: "#f43f5e" },
+    ];
+
     return (
-        <div className="space-y-6 max-w-7xl mx-auto">
-            {/* Welcome Header */}
-            <div className="bg-gradient-to-r from-indigo-700 to-violet-800 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
-                <div className="relative z-10">
-                    <h1 className="text-3xl font-bold mb-2">{t("welcome")}</h1>
-                    <p className="text-indigo-100 max-w-md">{t("welcome_msg")}</p>
+        <div className="space-y-8 max-w-7xl mx-auto pb-12">
+            {/* Executive Welcome & Header */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 className="text-3xl font-black tracking-tight text-slate-900">{t("welcome")} 👋</h1>
+                    <p className="text-slate-500 font-medium mt-1">{t("welcome_msg")}</p>
                 </div>
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
+                <div className="flex items-center space-x-3 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
+                    <button className="px-4 py-2 bg-slate-50 text-slate-600 text-xs font-bold rounded-xl hover:bg-slate-100 transition-all">{t("export_report")}</button>
+                    <button className="px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">{t("generate_invoice")}</button>
+                </div>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard title="Total Personnel" value={stats?.total_personnel || "..."} change="+0%" trend="up" icon={<Users className="w-6 h-6" />} color="indigo" />
-                <StatCard title="Inventory SKU" value={stats?.total_inventory_sku || "..."} change="+0%" trend="up" icon={<Boxes className="w-6 h-6" />} color="emerald" />
-                <StatCard title="Active Shipments" value={stats?.active_shipments || "..."} change="+0%" trend="up" icon={<Truck className="w-6 h-6" />} color="blue" />
-                <StatCard title="Incident Rate" value={stats?.incident_rate || "..."} change="+0%" trend="up" icon={<AlertCircle className="w-6 h-6" />} color="rose" />
+            {/* KPI Cards (Top Row) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                <MetricCard
+                    title={t("revenue_vs_target")}
+                    mainValue={formatCurrency(stats?.revenue)}
+                    subValue={`${((stats?.revenue / (stats?.target_revenue || 1)) * 100).toFixed(0)}% ${t("of_target")}`}
+                    icon={<DollarSign className="w-5 h-5" />}
+                    color="indigo"
+                    trend="+12%"
+                />
+                <MetricCard
+                    title={t("operating_costs")}
+                    mainValue={formatCurrency(stats?.operating_costs)}
+                    subValue={t("monthly_expenses")}
+                    icon={<Activity className="w-5 h-5" />}
+                    color="rose"
+                    trend="-5%"
+                    trendDown
+                />
+                <MetricCard
+                    title={t("gross_profit")}
+                    mainValue={formatCurrency(stats?.gross_profit)}
+                    subValue={t("net_margin")}
+                    icon={<TrendingUp className="w-5 h-5" />}
+                    color="emerald"
+                    trend="+8%"
+                />
+                <MetricCard
+                    title={t("pending_orders")}
+                    mainValue={stats?.pending_orders || "0"}
+                    subValue={t("in_production")}
+                    icon={<Briefcase className="w-5 h-5" />}
+                    color="amber"
+                />
+                <MetricCard
+                    title={t("delivery_rate")}
+                    mainValue={stats?.delivery_rate || "100%"}
+                    subValue={t("on_time_delivery")}
+                    icon={<Truck className="w-5 h-5" />}
+                    color="blue"
+                />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Inventory Analytics */}
-                <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="font-bold text-slate-900">Stock Movements</h3>
-                        <select className="text-sm border-none bg-slate-100 rounded-lg px-3 py-1 outline-none text-slate-900">
-                            <option>Last 7 Days</option>
-                            <option>Last 30 Days</option>
-                        </select>
-                    </div>
-                    <div className="h-80 w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={INVENTORY_DATA}>
-                                <defs>
-                                    <linearGradient id="colorStock" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1} />
-                                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} dy={10} />
-                                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                                <Tooltip
-                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                                    cursor={{ stroke: '#6366f1', strokeWidth: 2 }}
-                                />
-                                <Area type="monotone" dataKey="stock" stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#colorStock)" />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
-
-                {/* Project Pipeline */}
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <h3 className="font-bold text-slate-900 mb-6">Project Pipeline</h3>
-                    <div className="h-64 w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={PROJECT_STATUS}
-                                    innerRadius={60}
-                                    outerRadius={80}
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                >
-                                    {PROJECT_STATUS.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} />
-                                    ))}
-                                </Pie>
-                                <Tooltip />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </div>
-                    <div className="space-y-3 mt-4">
-                        {PROJECT_STATUS.map((item) => (
-                            <div key={item.name} className="flex items-center justify-between text-sm">
-                                <div className="flex items-center space-x-2">
-                                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
-                                    <span className="text-slate-600">{item.name}</span>
-                                </div>
-                                <span className="font-bold text-slate-900">{item.value}%</span>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Finance & Cash Flow Module */}
+                <div className="lg:col-span-2 space-y-8">
+                    <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm overflow-hidden relative group">
+                        <div className="flex justify-between items-center mb-8">
+                            <div>
+                                <h3 className="text-xl font-black text-slate-900 tracking-tight">{t("cash_flow")}</h3>
+                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">{t("cash_flow_sub")}</p>
                             </div>
-                        ))}
+                            <div className="flex items-center space-x-2">
+                                <span className="flex items-center text-[10px] font-black uppercase text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full">
+                                    <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full mr-2"></span> {t("inflow")}
+                                </span>
+                                <span className="flex items-center text-[10px] font-black uppercase text-rose-500 bg-rose-50 px-3 py-1 rounded-full">
+                                    <span className="w-1.5 h-1.5 bg-rose-500 rounded-full mr-2"></span> {t("outflow")}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="h-80 w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={CASH_FLOW_DATA}>
+                                    <defs>
+                                        <linearGradient id="colorInflow" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1} />
+                                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                                        </linearGradient>
+                                        <linearGradient id="colorOutflow" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.1} />
+                                            <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700 }} dy={10} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700 }} tickFormatter={(value) => `$${value / 1000}k`} />
+                                    <Tooltip
+                                        contentStyle={{ borderRadius: '24px', border: 'none', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', padding: '16px' }}
+                                    />
+                                    <Area type="monotone" dataKey="inflow" stroke="#6366f1" strokeWidth={4} fillOpacity={1} fill="url(#colorInflow)" />
+                                    <Area type="monotone" dataKey="outflow" stroke="#f43f5e" strokeWidth={4} fillOpacity={1} fill="url(#colorOutflow)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    {/* Finance Sub-cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* Overdue Invoices */}
+                        <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm">
+                            <h4 className="text-lg font-black text-slate-900 mb-6 flex items-center">
+                                <AlertCircle className="w-5 h-5 mr-3 text-rose-500" />
+                                {t("overdue_invoices")}
+                            </h4>
+                            <div className="space-y-4">
+                                {OVERDUE_INVOICES.map((inv) => (
+                                    <div key={inv.id} className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-rose-200 transition-all">
+                                        <div>
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{inv.id}</p>
+                                            <p className="text-sm font-bold text-slate-800">{inv.client}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-sm font-black text-rose-600">{formatCurrency(inv.amount)}</p>
+                                            <p className="text-[10px] items-center flex justify-end font-bold text-rose-400">
+                                                <Clock className="w-3 h-3 mr-1" /> {t("overdue")} {inv.days}d
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Dept Spending */}
+                        <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm">
+                            <h4 className="text-lg font-black text-slate-900 mb-6">{t("dept_spending")}</h4>
+                            <div className="flex items-center">
+                                <div className="w-1/2 h-40">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie
+                                                data={DEPT_SPENDING}
+                                                innerRadius={45}
+                                                outerRadius={65}
+                                                paddingAngle={8}
+                                                dataKey="value"
+                                            >
+                                                {DEPT_SPENDING.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
+                                <div className="w-1/2 space-y-3">
+                                    {DEPT_SPENDING.map((item) => (
+                                        <div key={item.name} className="flex items-center justify-between">
+                                            <div className="flex items-center">
+                                                <div className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
+                                                <span className="text-[11px] font-bold text-slate-500">{item.name}</span>
+                                            </div>
+                                            <span className="text-xs font-black text-slate-900">{item.value}%</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right Column: HR & Operations Module */}
+                <div className="space-y-8">
+                    {/* Headcount Card */}
+                    <div className="bg-indigo-600 p-8 rounded-[32px] text-white shadow-2xl shadow-indigo-100 flex flex-col justify-between min-h-[220px] relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
+                            <Users className="w-24 h-24" />
+                        </div>
+                        <div className="relative z-10">
+                            <p className="text-xs font-bold text-indigo-100 uppercase tracking-widest">{t("total_headcount")}</p>
+                            <h3 className="text-5xl font-black mt-2 tracking-tighter">{stats?.total_personnel || "0"}</h3>
+                            <p className="text-sm font-medium mt-4 text-indigo-100 flex items-center">
+                                <ArrowUpRight className="w-4 h-4 mr-1 text-emerald-400" />
+                                <span className="font-black text-emerald-400">+2</span> and growing this month
+                            </p>
+                        </div>
+                        <div className="pt-6 relative z-10">
+                            <div className="w-full bg-white/20 h-1.5 rounded-full overflow-hidden">
+                                <div className="bg-white w-[75%] h-full rounded-full shadow-sm"></div>
+                            </div>
+                            <div className="flex justify-between mt-2 text-[10px] font-black uppercase text-indigo-200">
+                                <span>{t("recruitment_target")}</span>
+                                <span>75%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Payroll Overview */}
+                    <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm group">
+                        <h4 className="text-lg font-black text-slate-900 mb-6 flex items-center justify-between">
+                            {t("payroll_budget")}
+                            <HelpCircle className="w-4 h-4 text-slate-300" />
+                        </h4>
+                        <div className="space-y-6">
+                            <div>
+                                <div className="flex justify-between items-end mb-2">
+                                    <p className="text-xs font-bold text-slate-400 uppercase">{t("monthly_payroll")}</p>
+                                    <p className="text-lg font-black text-indigo-600">{formatCurrency(stats?.payroll_budget)}</p>
+                                </div>
+                                <div className="w-full bg-slate-50 h-3 rounded-xl overflow-hidden border border-slate-100">
+                                    <div className="bg-indigo-500 h-full rounded-full" style={{ width: '60%' }}></div>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase">{t("avg_salary")}</p>
+                                    <p className="text-sm font-black text-slate-900">$3.0k</p>
+                                </div>
+                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase">{t("overtime")}</p>
+                                    <p className="text-sm font-black text-amber-600">$1.2k</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Attendance/Leave Rates */}
+                    <div className="bg-slate-900 p-8 rounded-[32px] text-white overflow-hidden relative shadow-2xl shadow-indigo-50">
+                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-transparent"></div>
+                        <h4 className="text-lg font-black mb-6 relative z-10">{t("attendance")}</h4>
+                        <div className="space-y-6 relative z-10">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                    <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center mr-4 backdrop-blur-md">
+                                        <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold text-slate-400 uppercase">{t("attendance_rate")}</p>
+                                        <p className="text-lg font-black">94.8%</p>
+                                    </div>
+                                </div>
+                                <TrendingUp className="w-8 h-8 text-emerald-500/30" />
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                    <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center mr-4 backdrop-blur-md">
+                                        <Zap className="w-5 h-5 text-amber-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold text-slate-400 uppercase">{t("leave_rate")}</p>
+                                        <p className="text-lg font-black">3.2%</p>
+                                    </div>
+                                </div>
+                                <TrendingDown className="w-8 h-8 text-amber-500/30" />
+                            </div>
+                        </div>
+                        <button className="w-full mt-8 py-4 bg-white text-slate-900 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-slate-100 transition-all shadow-xl shadow-white/5">
+                            {t("view_hr")}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -150,26 +338,32 @@ export default function Dashboard() {
     );
 }
 
-function StatCard({ title, value, change, trend, icon, color }: any) {
-    const colorMap: any = {
-        indigo: "text-indigo-600 bg-indigo-50",
-        emerald: "text-emerald-600 bg-emerald-50",
-        blue: "text-blue-600 bg-blue-50",
-        rose: "text-rose-600 bg-rose-50",
+function MetricCard({ title, mainValue, subValue, icon, color, trend, trendDown }: any) {
+    const colorVariants: any = {
+        indigo: "bg-indigo-50 text-indigo-600 border-indigo-100",
+        rose: "bg-rose-50 text-rose-600 border-rose-100",
+        emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
+        amber: "bg-amber-50 text-amber-600 border-amber-100",
+        blue: "bg-blue-50 text-blue-600 border-blue-100",
     };
 
     return (
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-start mb-4">
-                <div className={`p-3 rounded-xl ${colorMap[color]}`}>{icon}</div>
-                <div className={`flex items-center space-x-1 text-xs font-bold px-2 py-1 rounded-full ${trend === 'up' ? 'text-emerald-700 bg-emerald-100' : 'text-rose-700 bg-rose-100'}`}>
-                    {trend === 'up' ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                    <span>{change}</span>
+        <div className="bg-white p-6 rounded-[28px] border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+            <div className="flex justify-between items-start mb-5">
+                <div className={`p-3 rounded-2xl ${colorVariants[color]} border shadow-sm group-hover:scale-110 transition-transform`}>
+                    {icon}
                 </div>
+                {trend && (
+                    <div className={`flex items-center text-[10px] font-black px-2 py-1 rounded-lg ${trendDown ? 'text-rose-600 bg-rose-50 border border-rose-100' : 'text-emerald-600 bg-emerald-50 border border-emerald-100'}`}>
+                        {trendDown ? <ArrowDownRight className="w-3 h-3 mr-0.5" /> : <ArrowUpRight className="w-3 h-3 mr-0.5" />}
+                        {trend}
+                    </div>
+                )}
             </div>
             <div>
-                <p className="text-sm font-medium text-slate-500">{title}</p>
-                <h4 className="text-2xl font-bold text-slate-900 mt-1">{value}</h4>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{title}</p>
+                <h4 className="text-2xl font-black text-slate-900 mt-1 tracking-tight">{mainValue}</h4>
+                <p className="text-[10px] font-bold text-slate-400 mt-1">{subValue}</p>
             </div>
         </div>
     );
