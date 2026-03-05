@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
-const API_BASE = "http://localhost:8000/api/v1/inventory";
+const API_BASE = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"}/inventory`;
 
 interface InventoryItem {
     id: number;
@@ -89,10 +89,10 @@ export default function InventoryPage() {
         setFilteredItems(
             q
                 ? items.filter(
-                      (i) =>
-                          i.sku.toLowerCase().includes(q) ||
-                          i.name.toLowerCase().includes(q)
-                  )
+                    (i) =>
+                        i.sku.toLowerCase().includes(q) ||
+                        i.name.toLowerCase().includes(q)
+                )
                 : items
         );
     }, [searchQuery, items]);
@@ -207,11 +207,10 @@ export default function InventoryPage() {
             {/* Toast */}
             {toast && (
                 <div
-                    className={`fixed top-6 right-6 z-[100] px-5 py-3 rounded-xl shadow-xl text-sm font-semibold transition-all ${
-                        toast.type === "success"
+                    className={`fixed top-6 right-6 z-[100] px-5 py-3 rounded-xl shadow-xl text-sm font-semibold transition-all ${toast.type === "success"
                             ? "bg-emerald-600 text-white"
                             : "bg-rose-600 text-white"
-                    }`}
+                        }`}
                 >
                     {toast.msg}
                 </div>
@@ -326,18 +325,17 @@ export default function InventoryPage() {
                                             </div>
                                             <div className="w-24 h-1.5 bg-slate-100 rounded-full mt-1.5 overflow-hidden">
                                                 <div
-                                                    className={`h-full rounded-full ${
-                                                        item.quantity <
-                                                        item.min_quantity
+                                                    className={`h-full rounded-full ${item.quantity <
+                                                            item.min_quantity
                                                             ? "bg-rose-500"
                                                             : "bg-emerald-500"
-                                                    }`}
+                                                        }`}
                                                     style={{
                                                         width: `${Math.min(
                                                             (item.quantity /
                                                                 (item.min_quantity ||
                                                                     1)) *
-                                                                100,
+                                                            100,
                                                             100
                                                         )}%`,
                                                     }}

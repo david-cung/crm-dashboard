@@ -51,7 +51,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         setMounted(true);
-        fetch("http://localhost:8000/api/v1/dashboard/summary")
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"}/dashboard/summary`)
             .then(res => res.json())
             .then(data => setStats(data))
             .catch(err => console.error(err));

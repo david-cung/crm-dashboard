@@ -26,7 +26,7 @@ export default function LogisticsPage() {
 
     const fetchShipments = () => {
         setIsLoading(true);
-        fetch("http://localhost:8000/api/v1/logistics/")
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"}/logistics/`)
             .then(res => res.json())
             .then(data => {
                 setShipments(data);
@@ -45,7 +45,7 @@ export default function LogisticsPage() {
     const handleCreateShipment = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const res = await fetch("http://localhost:8000/api/v1/logistics/", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"}/logistics/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(newShipment)
@@ -62,7 +62,7 @@ export default function LogisticsPage() {
 
     const handleUpdateStatus = async (id: number, status: string) => {
         try {
-            const res = await fetch(`http://localhost:8000/api/v1/logistics/${id}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"}/logistics/${id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ status })
@@ -79,7 +79,7 @@ export default function LogisticsPage() {
         e.preventDefault();
         if (!selectedShipment) return;
         try {
-            const res = await fetch("http://localhost:8000/api/v1/logistics/incidents", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"}/logistics/incidents`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ ...newIncident, shipment_id: selectedShipment.id })

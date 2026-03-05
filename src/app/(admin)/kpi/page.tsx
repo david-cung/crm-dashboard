@@ -11,8 +11,8 @@ export default function KPIPage() {
     const fetchData = () => {
         setIsLoading(true);
         Promise.all([
-            fetch("http://localhost:8000/api/v1/kpi/leaderboard").then(res => res.json()),
-            fetch("http://localhost:8000/api/v1/kpi/events").then(res => res.json())
+            fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"}/kpi/leaderboard`).then(res => res.json()),
+            fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"}/kpi/events`).then(res => res.json())
         ])
             .then(([leaderData, eventData]) => {
                 setLeaderboard(leaderData);

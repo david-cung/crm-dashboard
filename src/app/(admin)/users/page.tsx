@@ -17,7 +17,7 @@ import {
     ShieldCheck
 } from "lucide-react";
 
-const API_BASE = "http://localhost:8000/api/v1/users";
+const API_BASE = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"}/users`;
 
 interface Employee {
     id: number;
