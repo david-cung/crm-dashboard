@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LayoutDashboard, Users, Boxes, Settings, Truck, Sun, Award, Globe } from "lucide-react";
+import { LayoutDashboard, Users, Boxes, Settings, Truck, Sun, Award, Globe, ShoppingCart } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 export function Sidebar() {
@@ -40,6 +40,10 @@ export function Sidebar() {
                 <Link href="/kpi" className="flex items-center space-x-3 text-slate-700 px-4 py-3 rounded-lg hover:bg-slate-100 transition-colors">
                     <Award className="w-5 h-5 text-amber-500" />
                     <span className="font-medium">{t("kpi")}</span>
+                </Link>
+                <Link href="/procurement" className="flex items-center space-x-3 text-slate-700 px-4 py-3 rounded-lg hover:bg-slate-100 transition-colors">
+                    <ShoppingCart className="w-5 h-5 text-violet-500" />
+                    <span className="font-medium">{t("procurement")}</span>
                 </Link>
 
                 <div className="pt-6 mt-6 border-t border-slate-200">

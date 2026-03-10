@@ -55,6 +55,7 @@ const dictionaries = {
         login: "Sign In",
         register: "Register",
         logout: "Sign Out",
+        procurement: "Procurement",
     },
     vi: {
         dashboard: "Tổng quan",
@@ -106,6 +107,7 @@ const dictionaries = {
         login: "Đăng nhập",
         register: "Đăng ký",
         logout: "Đăng xuất",
+        procurement: "Mua hàng",
     }
 };
 

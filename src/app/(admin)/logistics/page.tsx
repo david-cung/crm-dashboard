@@ -45,10 +45,16 @@ export default function LogisticsPage() {
     const handleCreateShipment = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            // Clean payload: converting empty strings to null for optional fields
+            const payload = {
+                ...newShipment,
+                estimated_arrival: newShipment.estimated_arrival || null
+            };
+
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"}/logistics/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newShipment)
+                body: JSON.stringify(payload)
             });
             if (res.ok) {
                 setIsCreateModalOpen(false);
@@ -171,7 +177,7 @@ export default function LogisticsPage() {
                                                     <ChevronRight className="w-4 h-4 mx-2 text-slate-300" />
                                                     <span className="bg-slate-100 px-2 py-0.5 rounded text-xs">{s.destination}</span>
                                                 </div>
-                                                {s.incidents?.length > 0 && (
+                                                {s.incidents && s.incidents.length > 0 && (
                                                     <div className="mt-4 flex flex-wrap gap-2">
                                                         {s.incidents.map((inc: any) => (
                                                             <div key={inc.id} className="flex items-center gap-1.5 bg-red-50 text-red-700 text-[11px] font-bold px-2 py-1 rounded-lg border border-red-100">
