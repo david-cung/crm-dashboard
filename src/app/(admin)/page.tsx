@@ -36,26 +36,10 @@ import {
 } from "recharts";
 import { useI18n } from "@/lib/i18n";
 
-// Mock data for charts
-const CASH_FLOW_DATA = [
-    { month: "Jan", inflow: 45000, outflow: 32000 },
-    { month: "Feb", inflow: 52000, outflow: 38000 },
-    { month: "Mar", inflow: 48000, outflow: 35000 },
-    { month: "Apr", inflow: 61000, outflow: 42000 },
-    { month: "May", inflow: 55000, outflow: 39000 },
-    { month: "Jun", inflow: 67000, outflow: 45000 },
-];
-
-const OVERDUE_INVOICES = [
-    { id: "INV-2024-001", client: "Solar Tech Co.", amount: 12500, days: 5 },
-    { id: "INV-2024-012", client: "Green Energy Ltd", amount: 8400, days: 12 },
-    { id: "INV-2024-015", client: "Home Power Inc", amount: 3200, days: 3 },
-];
-
 export default function Dashboard() {
     const [mounted, setMounted] = useState(false);
     const [stats, setStats] = useState<any>(null);
-    const { t } = useI18n();
+    const { t, lang } = useI18n();
 
     useEffect(() => {
         setMounted(true);
@@ -68,15 +52,11 @@ export default function Dashboard() {
     if (!mounted) return null;
 
     const formatCurrency = (val: number) => {
+        if (lang === 'vi') {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(val * 25000); // Simple conversion for demo
+        }
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val || 0);
     };
-
-    const DEPT_SPENDING = [
-        { name: t("logistics"), value: 40, color: "#6366f1" },
-        { name: t("inventory"), value: 30, color: "#f59e0b" },
-        { name: t("users"), value: 20, color: "#10b981" },
-        { name: "Marketing", value: 10, color: "#f43f5e" },
-    ];
 
     return (
         <div className="space-y-8 max-w-7xl mx-auto pb-12">
@@ -100,7 +80,6 @@ export default function Dashboard() {
                     subValue={`${((stats?.revenue / (stats?.target_revenue || 1)) * 100).toFixed(0)}% ${t("of_target")}`}
                     icon={<DollarSign className="w-5 h-5" />}
                     color="indigo"
-                    trend="+12%"
                 />
                 <MetricCard
                     title={t("operating_costs")}
@@ -108,8 +87,6 @@ export default function Dashboard() {
                     subValue={t("monthly_expenses")}
                     icon={<Activity className="w-5 h-5" />}
                     color="rose"
-                    trend="-5%"
-                    trendDown
                 />
                 <MetricCard
                     title={t("gross_profit")}
@@ -117,7 +94,6 @@ export default function Dashboard() {
                     subValue={t("net_margin")}
                     icon={<TrendingUp className="w-5 h-5" />}
                     color="emerald"
-                    trend="+8%"
                 />
                 <MetricCard
                     title={t("pending_orders")}
@@ -155,7 +131,7 @@ export default function Dashboard() {
                         </div>
                         <div className="h-80 w-full">
                             <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={CASH_FLOW_DATA}>
+                                <AreaChart data={stats?.cash_flow || []}>
                                     <defs>
                                         <linearGradient id="colorInflow" x1="0" y1="0" x2="0" y2="1">
                                             <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1} />
@@ -168,7 +144,7 @@ export default function Dashboard() {
                                     </defs>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                     <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700 }} dy={10} />
-                                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700 }} tickFormatter={(value) => `$${value / 1000}k`} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700 }} tickFormatter={(value) => lang === 'vi' ? `${value/1000}M` : `$${value / 1000}k`} />
                                     <Tooltip
                                         contentStyle={{ borderRadius: '24px', border: 'none', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', padding: '16px' }}
                                     />
@@ -188,7 +164,12 @@ export default function Dashboard() {
                                 {t("overdue_invoices")}
                             </h4>
                             <div className="space-y-4">
-                                {OVERDUE_INVOICES.map((inv) => (
+                                {(stats?.overdue_invoices || []).length === 0 ? (
+                                    <div className="text-center py-10">
+                                        <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2 opacity-20" />
+                                        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest text-center">{t("no_po")}</p>
+                                    </div>
+                                ) : stats.overdue_invoices.map((inv: any) => (
                                     <div key={inv.id} className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-rose-200 transition-all">
                                         <div>
                                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{inv.id}</p>
@@ -213,14 +194,18 @@ export default function Dashboard() {
                                     <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
                                             <Pie
-                                                data={DEPT_SPENDING}
+                                                data={stats?.dept_spending || []}
                                                 innerRadius={45}
                                                 outerRadius={65}
                                                 paddingAngle={8}
                                                 dataKey="value"
                                             >
-                                                {DEPT_SPENDING.map((entry, index) => (
-                                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                                {(stats?.dept_spending || []).map((entry: any, index: any) => (
+                                                    <Cell key={`cell-${index}`} fill={
+                                                        entry.name === 'logistics' ? "#6366f1" : 
+                                                        entry.name === 'inventory' ? "#f59e0b" : 
+                                                        "#10b981"
+                                                    } />
                                                 ))}
                                             </Pie>
                                             <Tooltip />
@@ -228,11 +213,15 @@ export default function Dashboard() {
                                     </ResponsiveContainer>
                                 </div>
                                 <div className="w-1/2 space-y-3">
-                                    {DEPT_SPENDING.map((item) => (
+                                    {(stats?.dept_spending || []).map((item: any) => (
                                         <div key={item.name} className="flex items-center justify-between">
                                             <div className="flex items-center">
-                                                <div className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
-                                                <span className="text-[11px] font-bold text-slate-500">{item.name}</span>
+                                                <div className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: 
+                                                    item.name === 'logistics' ? "#6366f1" : 
+                                                    item.name === 'inventory' ? "#f59e0b" : 
+                                                    "#10b981" 
+                                                }}></div>
+                                                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">{t(item.name)}</span>
                                             </div>
                                             <span className="text-xs font-black text-slate-900">{item.value}%</span>
                                         </div>

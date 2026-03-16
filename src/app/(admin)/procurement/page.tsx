@@ -39,15 +39,7 @@ interface PurchaseOrder {
     notes?: string;
 }
 
-const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
-    DRAFT: { label: "Bản nháp", color: "bg-slate-100 text-slate-600 border-slate-200", icon: FileText },
-    PENDING_APPROVAL: { label: "Chờ duyệt", color: "bg-amber-50 text-amber-700 border-amber-200", icon: Clock },
-    APPROVED: { label: "Đã duyệt", color: "bg-emerald-50 text-emerald-700 border-emerald-200", icon: CheckCircle2 },
-    SENT: { label: "Đã gửi NCC", color: "bg-indigo-50 text-indigo-700 border-indigo-200", icon: Truck },
-    PARTIALLY_RECEIVED: { label: "Nhận 1 phần", color: "bg-orange-50 text-orange-700 border-orange-200", icon: ArrowDownLeft },
-    COMPLETED: { label: "Hoàn tất", color: "bg-emerald-100 text-emerald-800 border-emerald-300", icon: CheckCircle2 },
-    CANCELLED: { label: "Đã hủy", color: "bg-rose-50 text-rose-600 border-rose-200", icon: X },
-};
+// Status config will be moved inside the component to use the 't' hook.
 
 export default function ProcurementPage() {
     const { t } = useI18n();
@@ -58,6 +50,16 @@ export default function ProcurementPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [mounted, setMounted] = useState(false);
+
+    const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
+        DRAFT: { label: t("draft"), color: "bg-slate-100 text-slate-600 border-slate-200", icon: FileText },
+        PENDING_APPROVAL: { label: t("pending_approval"), color: "bg-amber-50 text-amber-700 border-amber-200", icon: Clock },
+        APPROVED: { label: t("approve"), color: "bg-emerald-50 text-emerald-700 border-emerald-200", icon: CheckCircle2 },
+        SENT: { label: t("sent"), color: "bg-indigo-50 text-indigo-700 border-indigo-200", icon: Truck },
+        PARTIALLY_RECEIVED: { label: t("partially_received"), color: "bg-orange-50 text-orange-700 border-orange-200", icon: ArrowDownLeft },
+        COMPLETED: { label: t("completed"), color: "bg-emerald-100 text-emerald-800 border-emerald-300", icon: CheckCircle2 },
+        CANCELLED: { label: t("cancelled"), color: "bg-rose-50 text-rose-600 border-rose-200", icon: X },
+    };
 
     const [isCreatePOOpen, setIsCreatePOOpen] = useState(false);
     const [isSupplierOpen, setIsSupplierOpen] = useState(false);

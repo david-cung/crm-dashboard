@@ -131,15 +131,15 @@ export default function ProjectsPage() {
             {/* Header */}
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">Năng lượng & Dự án</h1>
-                    <p className="text-sm text-slate-500 mt-1">Quản lý lắp đặt và hệ thống năng lượng mặt trời.</p>
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">{t("projects")}</h1>
+                    <p className="text-sm text-slate-500 mt-1">{t("projects_desc")}</p>
                 </div>
                 <button
                     onClick={() => setIsCreateOpen(true)}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl flex items-center space-x-2 transition-all shadow-lg shadow-indigo-100"
                 >
                     <Plus className="w-4 h-4" />
-                    <span className="font-semibold text-sm">Tạo Dự án Mới</span>
+                    <span className="font-semibold text-sm">{t("create_project")}</span>
                 </button>
             </div>
 
@@ -150,7 +150,7 @@ export default function ProjectsPage() {
                         <Sun className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Tổng Công suất</p>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t("total_capacity")}</p>
                         <h3 className="text-xl font-bold text-slate-900">{projects.reduce((sum, p) => sum + p.system_size_kwp, 0).toFixed(1)} kWp</h3>
                     </div>
                 </div>
@@ -159,7 +159,7 @@ export default function ProjectsPage() {
                         <Zap className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Dự án Đang chạy</p>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t("running_projects")}</p>
                         <h3 className="text-xl font-bold text-slate-900">{projects.filter(p => p.status === "IN_PROGRESS").length} Projects</h3>
                     </div>
                 </div>
@@ -168,7 +168,7 @@ export default function ProjectsPage() {
                         <CheckCircle2 className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Hoàn tất</p>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t("completed_systems")}</p>
                         <h3 className="text-xl font-bold text-slate-900">{projects.filter(p => p.status === "DONE").length} Systems</h3>
                     </div>
                 </div>
@@ -180,13 +180,13 @@ export default function ProjectsPage() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input
                         type="text"
-                        placeholder="Tìm theo tên khách hàng hoặc dự án..."
+                        placeholder={t("search_projects")}
                         className="w-full bg-slate-50 border-none rounded-xl pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 text-slate-900 placeholder:text-slate-400"
                     />
                 </div>
                 <button className="px-4 py-2 bg-slate-50 rounded-xl text-slate-600 text-sm font-semibold flex items-center space-x-2 border border-slate-100">
                     <Filter className="w-4 h-4" />
-                    <span>Bộ lọc</span>
+                    <span>{t("filter")}</span>
                 </button>
             </div>
 
@@ -195,13 +195,13 @@ export default function ProjectsPage() {
                 {isLoading ? (
                     <div className="col-span-full py-20 text-center">
                         <Loader2 className="w-10 h-10 animate-spin mx-auto text-indigo-400" />
-                        <p className="text-slate-400 mt-4 font-medium">Đang tải danh sách dự án...</p>
+                        <p className="text-slate-400 mt-4 font-medium">{t("loading_projects")}</p>
                     </div>
                 ) : projects.length === 0 ? (
                     <div className="col-span-full py-20 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 text-center">
                         <Sun className="w-12 h-12 mx-auto text-slate-300 mb-4" />
-                        <h3 className="text-lg font-bold text-slate-900">Chưa có dự án nào</h3>
-                        <p className="text-slate-500 mt-1">Bắt đầu bằng việc tạo một dự án năng lượng mới.</p>
+                        <h3 className="text-lg font-bold text-slate-900">{t("no_projects")}</h3>
+                        <p className="text-slate-500 mt-1">{t("start_first_project")}</p>
                     </div>
                 ) : (
                     projects.map((project) => (
@@ -251,11 +251,11 @@ export default function ProjectsPage() {
 
                                 <div className="mt-6 pt-6 border-t border-slate-100 grid grid-cols-2 gap-4">
                                     <div className="bg-slate-50 p-3 rounded-2xl">
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Công suất</p>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">{t("capacity")}</p>
                                         <p className="text-sm font-black text-slate-900">{project.system_size_kwp} kWp</p>
                                     </div>
                                     <div className="bg-slate-50 p-3 rounded-2xl">
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Giá trị</p>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">{t("value_label")}</p>
                                         <p className="text-sm font-black text-indigo-600">${project.total_value.toLocaleString()}</p>
                                     </div>
                                 </div>
@@ -271,8 +271,8 @@ export default function ProjectsPage() {
                     <div className="bg-white rounded-[32px] w-full max-w-xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-300">
                         <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                             <div>
-                                <h3 className="font-bold text-2xl text-slate-900">Thiết lập Dự án Mới</h3>
-                                <p className="text-sm text-slate-500 mt-1">Nhập thông số kỹ thuật cho hệ thống năng lượng.</p>
+                                <h3 className="font-bold text-2xl text-slate-900">{t("setup_project")}</h3>
+                                <p className="text-sm text-slate-500 mt-1">{t("project_specs")}</p>
                             </div>
                             <button onClick={() => setIsCreateOpen(false)} className="bg-white p-2 rounded-full border border-slate-200 text-slate-400 hover:text-slate-600 shadow-sm">
                                 <X className="w-5 h-5" />
@@ -282,7 +282,7 @@ export default function ProjectsPage() {
                         <form onSubmit={handleCreate} className="p-8 space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black text-slate-500 uppercase tracking-widest px-1">Tên dự án</label>
+                                    <label className="text-xs font-black text-slate-500 uppercase tracking-widest px-1">{t("project_title")}</label>
                                     <input
                                         required
                                         className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all outline-none"
@@ -292,7 +292,7 @@ export default function ProjectsPage() {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black text-slate-500 uppercase tracking-widest px-1">Tên Khách hàng</label>
+                                    <label className="text-xs font-black text-slate-500 uppercase tracking-widest px-1">{t("customer_name_label")}</label>
                                     <input
                                         required
                                         className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all outline-none"
@@ -304,7 +304,7 @@ export default function ProjectsPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-black text-slate-500 uppercase tracking-widest px-1">Địa điểm lắp đặt</label>
+                                <label className="text-xs font-black text-slate-500 uppercase tracking-widest px-1">{t("install_location")}</label>
                                 <div className="relative">
                                     <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                                     <input
@@ -356,7 +356,7 @@ export default function ProjectsPage() {
                                 ) : (
                                     <>
                                         <Zap className="w-5 h-5" />
-                                        <span>Khởi tạo Dự án</span>
+                                        <span>{t("init_project")}</span>
                                     </>
                                 )}
                             </button>
